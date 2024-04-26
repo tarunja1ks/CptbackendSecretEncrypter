@@ -12,6 +12,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 ''' Tutorial: https://www.sqlalchemy.org/library.html#tutorials, try to get into Python shell and follow along '''
 
 # Define the Post class to manage actions in 'posts' table,  with a relationship to 'users' table
+
 class Post(db.Model):
     __tablename__ = 'posts'
 
@@ -83,7 +84,7 @@ class User(db.Model):
 
     # Defines a relationship between User record and Notes table, one-to-many (one user to many notes)
     posts = db.relationship("Post", cascade='all, delete', backref='users', lazy=True)
-
+    binarys = db.relationship("Binary", cascade='all, delete', backref='users', lazy=True)
     # constructor of a User object, initializes the instance variables within object (self)
     def __init__(self, name, uid, password="123qwerty", dob=date.today(), hashmap={}, role="User"):
         self._name = name    # variables with self prefix become part of the object, 
@@ -220,7 +221,40 @@ class User(db.Model):
 
 
 """Database Creation and Testing """
-
+class Binary(db.Model):
+    
+    __tablename__='binarys'
+    
+    userID = db.Column(db.String, db.ForeignKey('users.id'))
+    Encrypt = db.Column(db.String, unique=False, nullable=False,primary_key=True)
+    Decrypt = db.Column(db.String, unique=False,nullable=False)
+    Shift= db.Column(db.Integer, unique=False,nullable=False)
+    # Define a relationship in Notes Schema to userID who originates the note, many-to-one (many notes to one user)
+    # __tablename__ = 'binary'
+    # Constructor of a Notes object, initializes of instance variables within object
+    def __init__(self, userid, Encrypt, Decrypt,Shift):
+        self.userID = userid
+        self.Encrypt=Encrypt
+        self.Decrypt=Decrypt 
+        self.Shift=Shift
+        
+    def create(self):
+        try:
+            # creates a person object from User(db.Model) class, passes initializers
+            print("success")
+            print()
+            db.session.add(self)  # add prepares to persist person object to Users table
+            db.session.commit()  # SqlAlchemy "unit of work pattern" requires a manual commit
+            print("complete")
+            return self
+        except IntegrityError:
+            db.session.remove()
+            print("haha l boz")
+            return None       
+    def read(self):
+        dictionary={"userid":self.userID, "Encrypt":self.Encrypt, "Decrypt": self.Decrypt, "Shift":self.Shift}
+        return dictionary
+    
 
 # Builds working data for testing
 def initUsers():
@@ -247,4 +281,3 @@ def initUsers():
                 '''fails with bad or duplicate data'''
                 db.session.remove()
                 print(f"Records exist, duplicate email, or error: {user.uid}")
-            

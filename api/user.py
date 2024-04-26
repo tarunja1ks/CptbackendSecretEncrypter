@@ -3,8 +3,8 @@ from flask import Blueprint, request, jsonify, current_app, Response
 from flask_restful import Api, Resource # used for REST API building
 from datetime import datetime
 from auth_middleware import token_required
-from AIcodebyme import generate
-from model.users import User
+from AIcodebyme.generate import generate
+from model.users import User,Binary
 
 user_api = Blueprint('user_api', __name__,
                    url_prefix='/api/users')
@@ -61,17 +61,47 @@ class UserAPI:
             return f"Deleted user: {json}", 204 
     class _BinaryCipher(Resource):
         @token_required()
-        def post(self): #Encrypting/Decrypting
+        def post(self, _): #Encrypting/Decrypting
+            print('here')
             randomnumber=generate()
-            shift=randomnumber.getrandom()
-            body=request.json()
+            shift=randomnumber.getrandom(1)
+            body=request.get_json()
             text=body.get("Text")
             encrypttext=""
             for character in text:
-                encrypttext+=int(character,2)
-            encrypttext=encrypttext[shift:]+encrypttext[:shift]
+                print(bin(ord(character)))
+                encrypttext+=str(bin(ord(character)))
+            thing=encrypttext
+            encrypttext=""
+            for i in thing:
+                if(i!='b'):
+                    encrypttext+=i #7
+            print(encrypttext)            
+            encrypttext=encrypttext[int(shift[0]):]+encrypttext[:int(shift[0])]
+            token = request.cookies.get("jwt")
+            cur_user = jwt.decode(token, current_app.config["SECRET_KEY"], algorithms=["HS256"])['_uid']
+            print(cur_user,encrypttext,text,int(shift[0]))
+            thedata=Binary(cur_user,encrypttext,text,int(shift[0]))
+            thedata.create()
             
             return jsonify(encrypttext)
+        
+        @token_required()
+        def get(self, _):
+            token = request.cookies.get("jwt")
+            cur_user = jwt.decode(token, current_app.config["SECRET_KEY"], algorithms=["HS256"])['_uid']
+            texts= Binary.query.all()  
+            encryptedtexts=[]
+            for text in texts:
+                if(text.read()['userid']==cur_user):
+                    print(text,cur_user,text.read()['userid'])  
+                    encryptedtexts.append(str(text))
+            return jsonify(encryptedtexts)
+        def put(self):
+            body=request.get_json()
+            text=body.get("Text")
+            return jsonify(text)
+            
         
             
             
@@ -136,5 +166,5 @@ class UserAPI:
             
     api.add_resource(_CRUD, '/')
     api.add_resource(_Security, '/authenticate')
-    api.add_resource(_BinaryCipher,'/')
+    api.add_resource(_BinaryCipher,'/binary')
     
