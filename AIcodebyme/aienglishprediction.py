@@ -1,4 +1,4 @@
-from aienglish import aienglish
+from AIcodebyme.aienglish import aienglish
 import joblib
 class aienglishprediction:
     def __init__(self):
@@ -11,6 +11,6 @@ class aienglishprediction:
         tfidf_vectorizer = joblib.load(vectorizer_filename)
         value=trained_model.predict(tfidf_vectorizer.transform(text))
         predicted_probabilities = trained_model.predict_proba(tfidf_vectorizer.transform(text))
-        print(predicted_probabilities)
-        print(value)
-        return int(value[0])
+        return float(predicted_probabilities[0][0])
+aithing=aienglishprediction()
+print(aithing.predict("i love to eat food"))

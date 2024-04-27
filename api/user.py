@@ -4,6 +4,9 @@ from flask_restful import Api, Resource # used for REST API building
 from datetime import datetime
 from auth_middleware import token_required
 from AIcodebyme.generate import generate
+from AIcodebyme.aienglishprediction import aienglishprediction
+from AIcodebyme.encryption import encrypter
+from AIcodebyme.aienglish import aienglish
 from model.users import User,Binary
 
 user_api = Blueprint('user_api', __name__,
@@ -67,20 +70,13 @@ class UserAPI:
             shift=randomnumber.getrandom(1)
             body=request.get_json()
             text=body.get("Text")
-            encrypttext=""
-            for character in text:
-                print(bin(ord(character)))
-                encrypttext+=str(bin(ord(character)))
-            thing=encrypttext
-            encrypttext=""
-            for i in thing:
-                if(i!='b'):
-                    encrypttext+=i #7
-            print(encrypttext)            
+            thenenc=encrypter(text)
+            encrypttext=thenenc.encrypt() 
+            print(encrypttext,'before')     
             encrypttext=encrypttext[int(shift[0]):]+encrypttext[:int(shift[0])]
+            
             token = request.cookies.get("jwt")
             cur_user = jwt.decode(token, current_app.config["SECRET_KEY"], algorithms=["HS256"])['_uid']
-            print(cur_user,encrypttext,text,int(shift[0]))
             thedata=Binary(cur_user,encrypttext,text,int(shift[0]))
             thedata.create()
             
@@ -92,6 +88,7 @@ class UserAPI:
             cur_user = jwt.decode(token, current_app.config["SECRET_KEY"], algorithms=["HS256"])['_uid']
             texts= Binary.query.all()  
             encryptedtexts=[]
+            
             for text in texts:
                 if(text.read()['userid']==cur_user):
                     print(text,cur_user,text.read()['userid'])  
@@ -100,7 +97,27 @@ class UserAPI:
         def put(self):
             body=request.get_json()
             text=body.get("Text")
-            return jsonify(text)
+            predictor=aienglishprediction()
+            allshifts=[]
+            confidences=[]
+            mydecrypter=encrypter("temp")
+            length=len(text)
+            for i in range(length+100):
+                unshiftedtext=mydecrypter.decrypt(text)
+                if(unshiftedtext==''):
+                    text=text[1:]+text[:1]
+                    continue
+                confidences.append(predictor.predict(unshiftedtext))
+                allshifts.append(unshiftedtext)
+                text=text[1:]+text[:1]
+                
+            maxconfidence=max(confidences)
+            indexconf=-1
+            for i in range(len(confidences)):
+                if(confidences[i]==maxconfidence):
+                    indexconf=i
+            print(allshifts[i])
+            return jsonify(allshifts[i])
             
         
             
