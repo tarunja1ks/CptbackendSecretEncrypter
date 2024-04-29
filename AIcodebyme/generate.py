@@ -5,7 +5,7 @@ class generate:
     def __init__(self):
         global url
         url = "https://api.random.org/json-rpc/4/invoke"
-    def getrandom(self, amount):
+    def getrandom(self, amount): # this is the api call to the random api that will generate me a random number between 1 and 26
         payload = json.dumps({
         "jsonrpc": "2.0",
         "method": "generateIntegers",

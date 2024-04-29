@@ -1,9 +1,9 @@
 from AIcodebyme.aienglish import aienglish
 import joblib
 class aienglishprediction:
-    def __init__(self):
+    def __init__(self): # making an object of aienglish.py
         self.predictor=aienglish()
-    def predict(self,text):
+    def predict(self,text): # this just loads in the file and uses the model to predict quickly rather than retraining every time for prediction
         text=[text]
         model_filename = "Checkingenglishmodel.joblib"
         vectorizer_filename = "vectorizerenglish.joblib"

@@ -64,10 +64,10 @@ class UserAPI:
             return f"Deleted user: {json}", 204 
     class Images(Resource):
         @token_required()
-        def post(self,_):
+        def post(self,_): # this function is uploading the image to the database
             print('here1')
             token = request.cookies.get("jwt")
-            cur_user = jwt.decode(token, current_app.config["SECRET_KEY"], algorithms=["HS256"])['_uid'] # current user
+            cur_user = jwt.decode(token, current_app.config["SECRET_KEY"], algorithms=["HS256"])['_uid'] # getting the current user 
             body=request.get_json()
             print('here')
             base64=body.get("Image")
@@ -75,7 +75,7 @@ class UserAPI:
                 return {'message': 'Message content is missing'},400
             users = User.query.all()
             for user in users:
-                if user.uid == cur_user:
+                if user.uid == cur_user: # looping to check when we have found the current user and then updating the image
                     user.updatepfp(base64)
             print("succesful")
         @token_required()
@@ -85,7 +85,7 @@ class UserAPI:
             cur_user = jwt.decode(token, current_app.config["SECRET_KEY"], algorithms=["HS256"])['_uid'] # current user
             users = User.query.all()
             for user in users:
-                if user.uid == cur_user:
+                if user.uid == cur_user: # looping through all users till reaching the curent user and updating profile picture 
                     # print(type(user))
                     # print(jsonify(user.getProfile()))
                     return jsonify(user.getprofile())
@@ -93,14 +93,14 @@ class UserAPI:
         @token_required()
         def post(self, _): #Encrypting/Decrypting
             print('here')
-            randomnumber=generate()
+            randomnumber=generate() # generating the random number for rotating binary digits
             shift=randomnumber.getrandom(1)
             body=request.get_json()
             text=body.get("Text")
-            thenenc=encrypter(text)
+            thenenc=encrypter(text) # creating the encryption of the text 
             encrypttext=thenenc.encrypt() 
             print(encrypttext,'before')     
-            encrypttext=encrypttext[int(shift[0]):]+encrypttext[:int(shift[0])]
+            encrypttext=encrypttext[int(shift[0]):]+encrypttext[:int(shift[0])] # Actual rotation of the text
             
             token = request.cookies.get("jwt")
             cur_user = jwt.decode(token, current_app.config["SECRET_KEY"], algorithms=["HS256"])['_uid']
@@ -110,37 +110,37 @@ class UserAPI:
             return jsonify(encrypttext)
         
         @token_required()
-        def get(self, _):
+        def get(self, _):# this is the preivous encryptions function
             token = request.cookies.get("jwt")
-            cur_user = jwt.decode(token, current_app.config["SECRET_KEY"], algorithms=["HS256"])['_uid']
+            cur_user = jwt.decode(token, current_app.config["SECRET_KEY"], algorithms=["HS256"])['_uid']# getting the current user 
             texts= Binary.query.all()  
             encryptedtexts=[]
             
             for text in texts:
                 if(text.read()['userid']==cur_user):
                     print(text,cur_user,text.read()['userid'])  
-                    encryptedtexts.append(text.read())
+                    encryptedtexts.append(text.read()) # creating a list of all encryption queries made by the specific user
             return jsonify(encryptedtexts)
-        def put(self):
+        def put(self): # this is the decryption function
             body=request.get_json()
             text=body.get("Text")
             predictor=aienglishprediction()
             allshifts=[]
             confidences=[]
-            mydecrypter=encrypter("temp")
+            mydecrypter=encrypter("temp") # I pass through a random string but this creates an object of the encrypter class to perform binary->character conversion
             length=len(text)
-            for i in range(length+100):
-                unshiftedtext=mydecrypter.decrypt(text)
+            for i in range(length+100): # iterating through all of the binary digits 
+                unshiftedtext=mydecrypter.decrypt(text) # trying decrypting the text for the current rotation 
                 if(unshiftedtext==''):
                     text=text[1:]+text[:1]
                     continue
-                confidences.append(predictor.predict(unshiftedtext))
+                confidences.append(predictor.predict(unshiftedtext)) # append the confidence that the current rotation is the correct decryption 
                 allshifts.append(unshiftedtext)
-                text=text[1:]+text[:1]
+                text=text[1:]+text[:1] # if unable to find correct english from this rotation rotate once again 
                 
             maxconfidence=max(confidences)
             indexconf=-1
-            for i in range(len(confidences)):
+            for i in range(len(confidences)): # finding the rotation text where it is most confident
                 if(confidences[i]==maxconfidence):
                     indexconf=i
             print(allshifts[i])

@@ -231,7 +231,7 @@ class User(db.Model):
 
 
 """Database Creation and Testing """
-class Binary(db.Model):
+class Binary(db.Model): # I have added thw class Binary to store all of my featuers relating to it
     
     __tablename__='binarys'
     
@@ -242,7 +242,7 @@ class Binary(db.Model):
     # Define a relationship in Notes Schema to userID who originates the note, many-to-one (many notes to one user)
     # __tablename__ = 'binary'
     # Constructor of a Notes object, initializes of instance variables within object
-    def __init__(self, userid, Encrypt, Decrypt,Shift):
+    def __init__(self, userid, Encrypt, Decrypt,Shift): # I initialize all details relating to the encryption query
         self.userID = userid
         self.Encrypt=Encrypt
         self.Decrypt=Decrypt 
