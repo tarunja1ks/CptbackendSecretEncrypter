@@ -1,3 +1,56 @@
+## Project Description
+This project focuses on encryption and decryption of text and was a fun project to help me solidy knowledge in numerous areas including ML, and more. 
+Here is an explanation on how the encryption and decrytpion algorithims work:
+
+Encryption: I first take input of the text from the frontend. With the text, I then go through each character and convert it to decimal using the ASCII table, then proceed to convert it to binary. After this conversion into binary, I then shift and rotate all digits by a randolmy generated number, further encrypting the text.
+Text Characters->Decimal->Binary
+
+Decryption: To uncover the previous encryption I did on the text, I first go through all possibly shifts/rotations of the digits or every possible combination and convert it from Binary into Decimal and then into ASCII characters. With the text conversion generated from each combination, I then use artificial intelligence to detect which text is most likely English and the decrypted result and not the random gibberish generated from guessing the wrong shift/rotation number. 
+Binary-> Decimal-> Text-> Check all Texts with AI and see which one represents English the most
+
+## My personal file contributions(files I created)
+I have created the files aienglish.py, aienglishprediction.py, aienglishtrainer.py, datagen.py, encryption.py, and generate.py, which are all files focused on the AI decryption of this project with the exception of encryption.py having both aspects of encryption AND decryption. 
+
+File Descriptions:
+
+aienglish.py: This is the file that I have created, which has all the functions to the AI model including preporcessing, training, and exporting the model(so we dont retrain every time we run the projet and all the model is pre-saved into a file)
+
+aienglishtrainer.py: This file is mainly for calling the functions in aienglish.py and training the Artificial Intelligence Model and was just a simple script for my personal use with all the testing and debugging
+
+
+datagen.py: Converts the datasets listed in the section below into 1 file and even does data augmentation on the dataset to increase the accuracy of the AI
+
+encryption.py: Has 2 functions encryption and (non-AI) decryption(this decryption is just converting binary to characters so its half-decrypting the text)
+
+generate.py: This file is mainly for getting a random number for encryption as I felt it would make encryption much more secure than using a random number library
+
+
+## My personal file contributions(files I created) files I modified
+I have personally only modified 2 models for the most part, however there are additional files modified with code, which I will also mention here:
+
+model/users.py: In this file I have created the class Binary, which represents the features of each text having the rotation amount, user that requested for encryption, and more details. Apart from this modification, I have also made a updatepfp and self.image variable, which contains the base64 encrypted text of the users profile picture and allows them to upload it to the database. All of this modifications and classes are stored in a database called instance/volumes/sqlite.db.
+
+api/user.py: Over here I had created the class _BinaryCipher, which performs database operations and recieves frontend JSON data. The database operations here include "post", which uploads related information into the database, and "get", which returns all of the text-encryptions made by the user. I have also created the class Images, which has the function "post", that uploads the image, and "get" that takes the image from the database. 
+
+## Datasets used for the ML(I found online)
+Here are the filenaes of datasets I have found and the respective links:
+https://www.kaggle.com/datasets/pashupatigupta/emotion-detection-from-text filename: tweet_emotions.csv
+https://github.com/kartikn27/nlp-question-detection/blob/master/queries-10k-txt filename: englishsentences.txt
+
+
+
+
+
+
+
+
+## Other contributions
+Although I have worked largely on this project, I woudl also like to mention other contributions that came from my teachers who have provided me this backend template. In this they have mainly and most importantly provided, auth_middleware.py, which helps with the login system, other classes in model/users.py and also api/user.py that help with login too. main.py which runs the flask server(although I changed port number), the docker-rlated files, and much more. 
+
+
+
+
+## Everything in Below this was created by my teacher
 # Flask Portfolio Starter
 
 Use this project to create a Flask Servr.

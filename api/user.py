@@ -62,6 +62,33 @@ class UserAPI:
             json = user.read()
             user.delete() 
             return f"Deleted user: {json}", 204 
+    class Images(Resource):
+        @token_required()
+        def post(self,_):
+            print('here1')
+            token = request.cookies.get("jwt")
+            cur_user = jwt.decode(token, current_app.config["SECRET_KEY"], algorithms=["HS256"])['_uid'] # current user
+            body=request.get_json()
+            print('here')
+            base64=body.get("Image")
+            if not base64:
+                return {'message': 'Message content is missing'},400
+            users = User.query.all()
+            for user in users:
+                if user.uid == cur_user:
+                    user.updatepfp(base64)
+            print("succesful")
+        @token_required()
+        def get(self,_):
+            print("here")
+            token = request.cookies.get("jwt")
+            cur_user = jwt.decode(token, current_app.config["SECRET_KEY"], algorithms=["HS256"])['_uid'] # current user
+            users = User.query.all()
+            for user in users:
+                if user.uid == cur_user:
+                    # print(type(user))
+                    # print(jsonify(user.getProfile()))
+                    return jsonify(user.getprofile())
     class _BinaryCipher(Resource):
         @token_required()
         def post(self, _): #Encrypting/Decrypting
@@ -92,7 +119,7 @@ class UserAPI:
             for text in texts:
                 if(text.read()['userid']==cur_user):
                     print(text,cur_user,text.read()['userid'])  
-                    encryptedtexts.append(str(text))
+                    encryptedtexts.append(text.read())
             return jsonify(encryptedtexts)
         def put(self):
             body=request.get_json()
@@ -184,4 +211,5 @@ class UserAPI:
     api.add_resource(_CRUD, '/')
     api.add_resource(_Security, '/authenticate')
     api.add_resource(_BinaryCipher,'/binary')
+    api.add_resource(Images,'/images')
     
